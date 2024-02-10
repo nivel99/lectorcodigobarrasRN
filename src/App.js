@@ -4,6 +4,23 @@ import BarcodeScannerComponent from "react-qr-barcode-scanner";
 function App() {
   const [data, setData] = useState("Not Found");
   const [scannedCodes, setScannedCodes] = useState([]);
+  
+  const [flashlightOn, setFlashlightOn] = useState(false);
+
+  const toggleFlashlight = () => {
+    setFlashlightOn((prev) => !prev);
+    // Acceder a la API de Web para manejar la linterna
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: "environment" } })
+      .then((stream) => {
+        const track = stream.getVideoTracks()[0];
+        track.applyConstraints({
+          advanced: [{ torch: flashlightOn }],
+        });
+      })
+      .catch((error) => console.error("Error al acceder a la linterna:", error));
+  };
+
 
   const handleScan = (err, result) => {
     if (result) {
@@ -47,6 +64,9 @@ function App() {
           <li key={index}>{code}</li>
         ))}
       </ul>
+      <button onClick={toggleFlashlight}>
+        {flashlightOn ? "Apagar linterna" : "Encender linterna"}
+      </button>
     </>
   );
 }
